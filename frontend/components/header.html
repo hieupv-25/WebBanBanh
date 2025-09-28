@@ -1,0 +1,45 @@
+<header class="header">
+  <div class="topbar">
+    <span>Nguyen Son Bakery – Hotline: <strong>02438222228</strong></span>
+  </div>
+
+  <div class="header__middle container">
+    <a class="brand" href="./index.html">
+      <img src="../assets/img/logo.png" alt="Logo" />
+    </a>
+
+    <form class="search" onsubmit="event.preventDefault();">
+      <input type="search" placeholder="Tìm kiếm sản phẩm..." />
+      <button type="submit" aria-label="Tìm kiếm">🔎</button>
+    </form>
+
+    <nav class="user">
+      <a href="./login.html">Đăng nhập / Đăng ký</a>
+      <a href="./cart.html" class="cart">🛒 Giỏ hàng <span id="cart-count" class="badge">0</span></a>
+    </nav>
+  </div>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="./index.html">Trang chủ</a>
+      <div class="dropdown">
+        <button class="dropdown__btn">Bánh ngọt & Bánh mỳ ▾</button>
+        <div class="dropdown__menu">
+          <a href="./products.html?cat=ngot">Bánh ngọt</a>
+          <a href="./products.html?cat=banh-mi">Bánh mỳ</a>
+          <a href="./products.html?cat=mini">Bánh miếng nhỏ</a>
+        </div>
+      </div>
+      <a href="./gallery.html">Gallery</a>
+      <a href="./news.html">Tin tức & Khuyến mại</a>
+      <div class="dropdown">
+        <button class="dropdown__btn">Liên hệ ▾</button>
+        <div class="dropdown__menu">
+          <a href="./about.html">Giới thiệu</a>
+          <a href="./contact.html">Liên hệ</a>
+        </div>
+      </div>
+      <a href="./careers.html">Tuyển dụng</a>
+    </div>
+  </nav>
+</header>
