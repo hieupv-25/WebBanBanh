@@ -144,18 +144,18 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
 
     <!-- Flash Messages -->
     <?php if($success = Session::getFlash('success')): ?>
-        <div class="container mt-3">
-            <div class="alert alert-success alert-dismissible fade show">
-                <?= e($success) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show">
+            <strong>Thành công!</strong> <?= e($success) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    </div>
     <?php endif; ?>
-    
+
     <?php if($error = Session::getFlash('error')): ?>
         <div class="container mt-3">
             <div class="alert alert-danger alert-dismissible fade show">
-                <?= e($error) ?>
+                <strong>Đã xảy ra lỗi!</strong> <?= e($error) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
