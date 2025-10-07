@@ -1,6 +1,6 @@
 <?php
-require_once '../../backend/config/config.php';
-require_once '../../backend/src/helpers/Session.php';
+require_once(__DIR__ . '/../../backend/config/config.php');
+require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
