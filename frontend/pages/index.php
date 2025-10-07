@@ -152,9 +152,24 @@ $categories = $stmtCategories->fetchAll();
                     cách Pháp không xa lạ gì với thương hiệu Nguyễn Sơn Bakery.
                 </p>
                 <p class="text-muted">
-                    Mỗi chiếc bánh ở Nguyễn Sơn Bakery lại mang một vẻ riêng, từ hương vị đến 
-                    cách trang trí. Bánh có vị ngọt không quá đậm, vị béo thì thanh nên không 
-                    gây cảm giác ngán cho người thưởng thức.
+                    Mỗi chiếc bánh ở Nguyễn Sơn Bakery lại mang một vẻ riêng, từ hương vị đến cách trang trí.
+                    Hình thức giản dị chỉ với hai màu đen trắng làm chủ đạo nhưng chất lượng nhờ cách làm tinh tế và tỉ mỉ. 
+                    Bánh có vị ngọt không quá đậm, vị béo thì thanh nên không gây cảm giác ngán cho người thưởng thức.
+                    Cũng rất hiếm khi tìm thấy sự trùng lặp trong các loại bánh ở Nguyễn Sơn Bakery vì tất cả chúng, từ bánh mì, bánh ngọt, bánh quy đều được làm 100% hand-made.
+                    Hơn nữa, ông chủ của tiệm bánh, Chef Nguyễn Sơn, cũng là người khá khó tính trong việc lựa chọn nguyên liệu cho các sản phẩm của cửa hàng.
+                </p>
+                <p class="text-muted">
+                    Xuất thân trong gia đình có nghề làm bánh mỳ truyền thống, Chef Nguyễn Sơn cũng có thời gian dài làm việc tại Công ty Bodega rồi Sofitel Metropole.
+                    Anh có hơn 10 năm kinh nghiệm làm Chef bánh tại khách sạn danh tiếng Sofitel Metropole Legende Hanoi.
+                </p>
+                <p class="text-muted">
+                    Và cũng chính ông chủ Nguyễn Sơn vẫn tự tay làm ra những chiếc bánh ngọt độc đáo. 
+                    Bên cạnh việc kinh doanh, với ông chủ trẻ này thì “ làm bánh là một nghệ thuật đầy sáng tạo, được thể hiện cầu kỳ và nghiêm ngặt từ khâu chế biến cho đến việc trang trí, trình bày các họa tiết ".
+                    Mỗi chiếc bánh được anh làm ra đều thỏa mãn hai ước mơ: nghệ thuật và kinh doanh.
+                </p>
+                <p class="text-muted">
+                    Đến nay Nguyễn Sơn Bakery đã phát triển với một chuỗi cửa hàng tại Hà Nội, Hải Phòng, Bắc Ninh, Hưng Yên.
+                    Mỗi nơi có một phong cách, một ấn tượng riêng nhưng tất cả đều hướng tới một điều là chất lượng và trang nhã.
                 </p>
                 <a href="<?= url('frontend/pages/about.php') ?>" class="btn btn-brown">
                     Tìm hiểu thêm
