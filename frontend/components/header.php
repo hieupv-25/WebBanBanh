@@ -1,5 +1,6 @@
 <?php
-require_once '../../backend/config/config.php';
+require_once(__DIR__ . '/../../backend/config/config.php');
+
 require_once '../../backend/src/helpers/Session.php';
 ?>
 <!DOCTYPE html>
@@ -104,44 +105,88 @@ require_once '../../backend/src/helpers/Session.php';
 
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= url('frontend/pages/index.php') ?>">
-                            <i class="fas fa-home"></i> Trang chủ
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            Sản phẩm
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php') ?>">Tất cả sản phẩm</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-ngot') ?>">Bánh ngọt</a></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-my') ?>">Bánh mỳ</a></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-sinh-nhat') ?>">Bánh sinh nhật</a></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-trung-thu') ?>">Bánh trung thu</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= url('frontend/pages/about.php') ?>">Giới thiệu</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= url('frontend/pages/news/list.php') ?>">Tin tức & Khuyến mãi</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= url('frontend/pages/contact.php') ?>">Liên hệ</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <!-- Trang chủ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= url('frontend/pages/index.php') ?>">
+                        Trang chủ
+                    </a>
+                </li>
 
+                <!-- Bánh ngọt & Bánh mỳ với dropdown nhiều loại -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Bánh ngọt và Bánh mỳ
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php') ?>">Tất cả sản phẩm</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-sinh-nhat') ?>">Bánh sinh nhật</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-my') ?>">Bánh mỳ</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-tươi') ?>">Bánh tươi</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-ngot') ?>">Bánh ngọt</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-quy-kho') ?>">Bánh quy khô</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=chocolate') ?>">Chocolate</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-mieng-nho') ?>">Bánh miếng nhỏ</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-trung-thu') ?>">Bánh trung thu</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=phu-kien-sinh-nhat') ?>">Phụ kiện sinh nhật</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-truyen-thong') ?>">Bánh truyền thống</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-dong-lanh') ?>">Bánh đông lạnh</a></li>
+                    </ul>
+                </li>
+
+                <!-- Gallery -->
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= url('frontend/pages/gallery.php') ?>">
+                        Gallery
+                    </a>
+                </li>
+
+                <!-- Tin tức & Khuyến mại với dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Tin tức & Khuyến mại
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/news/list.php') ?>">Tất cả tin tức</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/news/list.php?type=promotion') ?>">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/news/list.php?type=event') ?>">Sự kiện</a></li>
+                    </ul>
+                </li>
+
+                <!-- Liên hệ với submenu chi nhánh -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Liên hệ
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/contact.php') ?>">Liên hệ chung</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/about.php') ?>">Giới thiệu</a></li>
+                        <!-- Nếu bạn muốn chi nhánh cụ thể, có thể thêm ở đây -->
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/contact.php?branch=hanoi') ?>">Nguyễn Sơn Bakery Hà Nội</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/contact.php?branch=bac-ninh') ?>">Bắc Ninh</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/contact.php?branch=haiphong') ?>">Hải Phòng</a></li>
+                        <li><a class="dropdown-item" href="<?= url('frontend/pages/contact.php?branch=ecopark') ?>">Ecopark – Hưng Yên</a></li>
+                    </ul>
+                </li>
+
+                <!-- Tuyển dụng -->
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= url('frontend/pages/careers.php') ?>">
+                        Tuyển dụng
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
     <!-- Flash Messages -->
     <?php if($success = Session::getFlash('success')): ?>
         <div class="container mt-3">
