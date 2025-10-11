@@ -68,7 +68,6 @@ body {
 .search-form .btn {
     border-radius: 0 25px 25px 0;
 }
-
 /* Navigation */
 .navbar {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -82,6 +81,13 @@ body {
 
 .nav-link:hover {
     color: var(--brown-primary) !important;
+}
+.products-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.products-dropdown .dropdown-menu {
+    display: none;
 }
 
 /* Hero Slider */
