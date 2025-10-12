@@ -85,19 +85,38 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
                 </div>
                 
                 <!-- Cart & Actions -->
-                <div class="col-md-4 text-end">
-                    <a href="<?= url('frontend/pages/cart.php') ?>" class="btn btn-outline-brown position-relative">
-                        <i class="fas fa-shopping-cart"></i> Giỏ hàng
-                        <?php 
-                        $cartCount = Session::getCartCount();
-                        if($cartCount > 0): 
-                        ?>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                <?= $cartCount ?>
-                            </span>
-                        <?php endif; ?>
-                    </a>
-                </div>
+                
+<div class="col-md-4 text-end">
+    <?php 
+    $cartCount = Session::getCartCount(); 
+    ?>
+    <a href="<?= url('frontend/pages/cart.php') ?>" class="btn btn-outline-brown cart-btn" style="position: relative; transition: transform 0.2s ease;">
+        <i class="fas fa-shopping-cart"></i> Giỏ hàng
+        <?php if($cartCount > 0): ?>
+            <span class="badge rounded-pill bg-danger cart-badge" style="
+                position: absolute;
+                top: 0;
+                right: -10px;
+                font-size: 0.8rem;
+                padding: 0.25em 0.5em;
+                transition: transform 0.2s ease;
+            ">
+                <?= $cartCount ?>
+            </span>
+        <?php endif; ?>
+    </a>
+</div>
+
+<!-- CSS hiệu ứng -->
+<style>
+.cart-btn:hover {
+    transform: scale(1.05); /* Phóng to nút giỏ hàng khi hover */
+}
+
+.cart-badge:hover {
+    transform: scale(1.2); /* Phóng to badge khi hover vào badge */
+}
+</style>
             </div>
         </div>
     </header>
