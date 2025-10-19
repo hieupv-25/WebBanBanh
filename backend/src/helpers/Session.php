@@ -1,166 +1,55 @@
 <?php
-/**
- * Session Helper Class
- * Quản lý session cho website
- */
-
-class Session {
-
-    /**
-     * Khởi tạo session
-     */
-    public static function init() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+class Session
+{
+    private static function start(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
     }
 
-    /**
-     * Set session
-     */
-    public static function set($key, $value) {
-        self::init();
-        $_SESSION[$key] = $value;
+    public static function init(): void { self::start(); }
+
+    // Key-Value
+    public static function set($key, $value): void { self::start(); $_SESSION[$key] = $value; }
+    public static function get($key, $default=null) { self::start(); return $_SESSION[$key] ?? $default; }
+    public static function remove($key): void { self::start(); unset($_SESSION[$key]); }
+
+    // Auth
+    public static function isLoggedIn(): bool { self::start(); return isset($_SESSION['user']); }
+
+    public static function setUser(array $user): void
+    {
+        self::start();
+        $_SESSION['user'] = [
+            'id'    => $user['id']    ?? null,
+            'name'  => $user['name']  ?? null,
+            'email' => $user['email'] ?? null,
+            'role'  => $user['role']  ?? 'customer',
+        ];
     }
 
-    /**
-     * Get session
-     */
-    public static function get($key, $default = null) {
-        self::init();
-        return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
+    public static function user(): ?array { self::start(); return $_SESSION['user'] ?? null; }
+    public static function getUserId() { self::start(); return $_SESSION['user']['id'] ?? null; }
+    public static function getUserRole(): ?string { self::start(); return $_SESSION['user']['role'] ?? null; }
+
+    // >>> Thêm hàm isAdmin() để Middleware gọi
+    public static function isAdmin(): bool
+    {
+        self::start();
+        $role = $_SESSION['user']['role'] ?? null;
+        return in_array($role, ['admin', 'superadmin'], true);
     }
 
-    /**
-     * Check if session exists
-     */
-    public static function has($key) {
-        self::init();
-        return isset($_SESSION[$key]);
-    }
+    public static function clearUser(): void { self::start(); unset($_SESSION['user']); }
+    public static function destroy(): void { self::start(); session_unset(); session_destroy(); }
 
-    /**
-     * Delete session
-     */
-    public static function delete($key) {
-        self::init();
-        if (isset($_SESSION[$key])) {
-            unset($_SESSION[$key]);
-        }
-    }
+    // Flash
+    public static function setFlash($key, $message): void { self::start(); $_SESSION['flash'][$key] = $message; }
+    public static function getFlash($key) { self::start(); $m=$_SESSION['flash'][$key]??null; if(isset($_SESSION['flash'][$key])) unset($_SESSION['flash'][$key]); return $m; }
 
-    /**
-     * Destroy all sessions
-     */
-    public static function destroy() {
-        self::init();
-        session_destroy();
-    }
-
-    /**
-     * Set flash message
-     */
-    public static function setFlash($type, $message) {
-        self::set('flash_' . $type, $message);
-    }
-
-    /**
-     * Get and delete flash message
-     */
-    public static function getFlash($type) {
-        $message = self::get('flash_' . $type);
-        self::delete('flash_' . $type);
-        return $message;
-    }
-
-    /**
-     * Check if user is logged in
-     */
-    public static function isLoggedIn() {
-        return self::has('user_id');
-    }
-
-    /**
-     * Check if user is admin
-     */
-    public static function isAdmin() {
-        return self::get('user_role') === 'admin';
-    }
-
-    /**
-     * Get current user ID
-     */
-    public static function getUserId() {
-        return self::get('user_id');
-    }
-
-    /**
-     * Set user session
-     */
-    public static function setUser($user) {
-        self::set('user_id', $user['id']);
-        self::set('user_name', $user['name']);
-        self::set('user_email', $user['email']);
-        self::set('user_role', $user['role']);
-    }
-
-    /**
-     * Clear user session
-     */
-    public static function clearUser() {
-        self::delete('user_id');
-        self::delete('user_name');
-        self::delete('user_email');
-        self::delete('user_role');
-    }
-
-    /**
-     * Cart functions
-     */
-    public static function addToCart($productId, $quantity = 1) {
-        self::init();
-        $cart = self::get('cart', []);
-
-        if (isset($cart[$productId])) {
-            $cart[$productId] += $quantity;
-        } else {
-            $cart[$productId] = $quantity;
-        }
-
-        self::set('cart', $cart);
-    }
-
-    public static function updateCart($productId, $quantity) {
-        self::init();
-        $cart = self::get('cart', []);
-
-        if ($quantity <= 0) {
-            unset($cart[$productId]);
-        } else {
-            $cart[$productId] = $quantity;
-        }
-
-        self::set('cart', $cart);
-    }
-
-    public static function removeFromCart($productId) {
-        self::init();
-        $cart = self::get('cart', []);
-        unset($cart[$productId]);
-        self::set('cart', $cart);
-    }
-
-    public static function getCart() {
-        return self::get('cart', []);
-    }
-
-    public static function clearCart() {
-        self::delete('cart');
-    }
-
-    public static function getCartCount() {
-        $cart = self::getCart();
-        return array_sum($cart);
-    }
+    // Cart
+    public static function getCart(): array { self::start(); return $_SESSION['cart'] ?? []; }
+    public static function getCartCount(): int { self::start(); $t=0; foreach(($_SESSION['cart']??[]) as $q){$t+=(int)$q;} return $t; }
+    public static function getCartDistinctCount(): int { self::start(); return isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; }
+    public static function addToCart($pid, $qty=1): void { self::start(); if(!isset($_SESSION['cart'][$pid])) $_SESSION['cart'][$pid]=0; $_SESSION['cart'][$pid]+=(int)$qty; }
+    public static function clearCart(): void { self::start(); unset($_SESSION['cart']); }
 }
-?>
