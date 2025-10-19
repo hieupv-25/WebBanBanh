@@ -65,11 +65,13 @@ function formatCurrency($amount) {
     return number_format($amount, 0, ',', '.') . '₫';
 }
 
-/**
- * Helper function để escape output
- */
-function e($string) {
-    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+// Escape an toàn cho HTML (chấp nhận null, số, bool, mảng)
+function e($value): string
+{
+    if ($value === null) return '';
+    if (is_bool($value)) $value = $value ? '1' : '0';
+    if (is_array($value)) $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+    return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
 /**
