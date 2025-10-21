@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once(__DIR__ . '/../../backend/config/config.php');
 require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
 ?>
@@ -160,6 +161,5 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
             </div>
         </div>
     <?php endif; ?>
-
     <!-- Main Content -->
     <main class="main-content">

@@ -79,48 +79,58 @@ AdminMiddleware::checkAdmin();
                         <small class="text-white-50">Nguyễn Sơn Bakery</small>
                     </div>
                     
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>" 
-                               href="<?= url('frontend/pages/admin/dashboard.php') ?>">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : '' ?>" 
-                               href="<?= url('frontend/pages/admin/products.php') ?>">
-                                <i class="fas fa-box"></i> Sản phẩm
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : '' ?>" 
-                               href="<?= url('frontend/pages/admin/categories.php') ?>">
-                                <i class="fas fa-tags"></i> Danh mục
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'orders.php' ? 'active' : '' ?>" 
-                               href="<?= url('frontend/pages/admin/orders.php') ?>">
-                                <i class="fas fa-shopping-cart"></i> Đơn hàng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'customers.php' ? 'active' : '' ?>" 
-                               href="<?= url('frontend/pages/admin/customers.php') ?>">
-                                <i class="fas fa-users"></i> Khách hàng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= url('frontend/pages/index.php') ?>">
-                                <i class="fas fa-home"></i> Về trang chủ
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= url('frontend/pages/auth/logout.php') ?>">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
-                        </li>
-                    </ul>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>" 
+                                href="<?= url('frontend/pages/admin/dashboard.php') ?>">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : '' ?>" 
+                                href="<?= url('frontend/pages/admin/products.php') ?>">
+                                    <i class="fas fa-box"></i> Sản phẩm
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : '' ?>" 
+                                href="<?= url('frontend/pages/admin/categories.php') ?>">
+                                    <i class="fas fa-tags"></i> Danh mục
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'orders.php' ? 'active' : '' ?>" 
+                                href="<?= url('frontend/pages/admin/orders.php') ?>">
+                                    <i class="fas fa-shopping-cart"></i> Đơn hàng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'customers.php' ? 'active' : '' ?>" 
+                                href="<?= url('frontend/pages/admin/customers.php') ?>">
+                                    <i class="fas fa-users"></i> Khách hàng
+                                </a>
+                            </li>
+
+                            <!-- MỤC MỚI: LIÊN HỆ -->
+                            <li class="nav-item">
+                                <a class="nav-link <?= in_array(basename($_SERVER['PHP_SELF']), ['contacts.php', 'contact-detail.php']) ? 'active' : '' ?>" 
+                                href="<?= url('frontend/pages/admin/contacts.php') ?>">
+                                    <i class="fas fa-envelope"></i> Liên hệ
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?= url('frontend/pages/index.php') ?>">
+                                    <i class="fas fa-home"></i> Về trang chủ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?= url('frontend/pages/auth/logout.php') ?>">
+                                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                </a>
+                            </li>
+                        </ul>
+
                 </div>
             </nav>
             

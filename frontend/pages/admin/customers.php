@@ -7,31 +7,47 @@ $database = new Database();
 $db = $database->getConnection();
 
 // Search
-$search = $_GET['search'] ?? '';
-$where = "role = 'customer'";
-$params = [];
+$search = trim($_GET['search'] ?? '');
 
-if ($search) {
-    $where .= " AND (name LIKE :search OR email LIKE :search OR phone LIKE :search)";
-    $params[':search'] = "%$search%";
+// ✅ XÂY DỰNG QUERY ĐỘNG
+if (!empty($search)) {
+    $queryUsers = "SELECT * FROM users 
+                   WHERE role = 'customer' 
+                   AND (name LIKE ? OR email LIKE ? OR phone LIKE ?) 
+                   ORDER BY created_at DESC";
+    $stmtUsers = $db->prepare($queryUsers);
+    $searchParam = "%$search%";
+    $stmtUsers->execute([$searchParam, $searchParam, $searchParam]);
+} else {
+    $queryUsers = "SELECT * FROM users WHERE role = 'customer' ORDER BY created_at DESC";
+    $stmtUsers = $db->prepare($queryUsers);
+    $stmtUsers->execute();
 }
 
-// Get customers with order stats
-$query = "SELECT u.*, 
-          COUNT(DISTINCT o.id) as total_orders,
-          SUM(o.total_amount) as total_spent
-          FROM users u
-          LEFT JOIN orders o ON u.id = o.user_id
-          WHERE $where
-          GROUP BY u.id
-          ORDER BY u.created_at DESC";
+$users = $stmtUsers->fetchAll();
 
-$stmt = $db->prepare($query);
-$stmt->execute($params);
-$customers = $stmt->fetchAll();
+// ✅ Lấy thống kê đơn hàng cho từng user
+$customers = [];
+foreach ($users as $user) {
+    // Lấy số đơn hàng và tổng chi tiêu
+    $statsQuery = "SELECT 
+                    COUNT(*) as total_orders,
+                    COALESCE(SUM(total_amount), 0) as total_spent
+                   FROM orders 
+                   WHERE user_id = ?";
+    $statsStmt = $db->prepare($statsQuery);
+    $statsStmt->execute([$user['id']]);
+    $stats = $statsStmt->fetch();
+    
+    // Gộp thông tin
+    $customers[] = array_merge($user, [
+        'total_orders' => $stats['total_orders'] ?? 0,
+        'total_spent' => $stats['total_spent'] ?? 0
+    ]);
+}
 
-// Thống kê
-$stats = [
+// Thống kê tổng quan
+$statsGeneral = [
     'total_customers' => $db->query("SELECT COUNT(*) FROM users WHERE role = 'customer'")->fetchColumn(),
     'active_customers' => $db->query("SELECT COUNT(*) FROM users WHERE role = 'customer' AND status = 1")->fetchColumn(),
     'customers_with_orders' => $db->query("SELECT COUNT(DISTINCT user_id) FROM orders WHERE user_id IS NOT NULL")->fetchColumn()
@@ -50,7 +66,7 @@ $stats = [
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-1">Tổng khách hàng</h6>
-                        <h3 class="mb-0"><?= $stats['total_customers'] ?></h3>
+                        <h3 class="mb-0"><?= $statsGeneral['total_customers'] ?></h3>
                     </div>
                     <div class="text-primary fs-1">
                         <i class="fas fa-users"></i>
@@ -66,7 +82,7 @@ $stats = [
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-1">Đang hoạt động</h6>
-                        <h3 class="mb-0"><?= $stats['active_customers'] ?></h3>
+                        <h3 class="mb-0"><?= $statsGeneral['active_customers'] ?></h3>
                     </div>
                     <div class="text-success fs-1">
                         <i class="fas fa-user-check"></i>
@@ -82,7 +98,7 @@ $stats = [
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-1">Đã mua hàng</h6>
-                        <h3 class="mb-0"><?= $stats['customers_with_orders'] ?></h3>
+                        <h3 class="mb-0"><?= $statsGeneral['customers_with_orders'] ?></h3>
                     </div>
                     <div class="text-info fs-1">
                         <i class="fas fa-shopping-bag"></i>
@@ -103,8 +119,17 @@ $stats = [
                        value="<?= e($search) ?>">
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>Tìm kiếm
+                </button>
             </div>
+            <?php if (!empty($search)): ?>
+            <div class="col-12">
+                <a href="customers.php" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-times me-2"></i>Xóa tìm kiếm
+                </a>
+            </div>
+            <?php endif; ?>
         </form>
     </div>
 </div>
@@ -112,6 +137,16 @@ $stats = [
 <!-- Customers Table -->
 <div class="card">
     <div class="card-body">
+        <?php if (empty($customers)): ?>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <?php if (!empty($search)): ?>
+                    Không tìm thấy khách hàng nào với từ khóa "<strong><?= e($search) ?></strong>".
+                <?php else: ?>
+                    Chưa có khách hàng nào.
+                <?php endif; ?>
+            </div>
+        <?php else: ?>
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
@@ -144,7 +179,7 @@ $stats = [
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php if ($customer['total_spent']): ?>
+                            <?php if ($customer['total_spent'] > 0): ?>
                                 <strong><?= formatCurrency($customer['total_spent']) ?></strong>
                             <?php else: ?>
                                 -
@@ -159,7 +194,7 @@ $stats = [
                             <?php endif; ?>
                         </td>
                         <td class="table-actions">
-                            <a href="customer-detail.php?id=<?= $customer['id'] ?>" class="btn btn-sm btn-primary">
+                            <a href="customer-detail.php?id=<?= $customer['id'] ?>" class="btn btn-sm btn-primary" title="Xem chi tiết">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </td>
@@ -168,6 +203,7 @@ $stats = [
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 

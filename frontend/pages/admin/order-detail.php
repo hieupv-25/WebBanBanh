@@ -29,16 +29,62 @@ $stmtItems = $db->prepare("SELECT * FROM order_items WHERE order_id = :order_id"
 $stmtItems->execute([':order_id' => $orderId]);
 $items = $stmtItems->fetchAll();
 
+// ✅ ĐỊNH NGHĨA CÁC TRẠNG THÁI HỢP LỆ CÓ THỂ CHUYỂN
+$allowedTransitions = [
+    'pending' => ['confirmed', 'cancelled'],
+    'confirmed' => ['processing', 'cancelled'],
+    'processing' => ['shipping', 'cancelled'],
+    'shipping' => ['completed', 'cancelled'],
+    'completed' => [], // Không được thay đổi
+    'cancelled' => []  // Không được thay đổi
+];
+
 // Cập nhật trạng thái
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $newStatus = $_POST['status'];
-    $stmt = $db->prepare("UPDATE orders SET status = :status WHERE id = :id");
-    $stmt->execute([':status' => $newStatus, ':id' => $orderId]);
+    $newStatus = trim($_POST['status']);
+    $currentStatus = $order['status'];
     
-    Session::setFlash('success', 'Cập nhật trạng thái đơn hàng thành công!');
+    // ✅ KIỂM TRA XEM TRẠNG THÁI MỚI CÓ HỢP LỆ KHÔNG
+    if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
+        Session::setFlash('error', 'Không thể chuyển từ trạng thái "' . $currentStatus . '" sang "' . $newStatus . '"!');
+    } else {
+        try {
+            $db->beginTransaction();
+            
+            // ✅ NẾU HỦY ĐƠN → HOÀN LẠI TỒN KHO
+            if ($newStatus === 'cancelled') {
+                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = :order_id");
+                $itemsStmt->execute([':order_id' => $orderId]);
+                $orderItems = $itemsStmt->fetchAll();
+                
+                foreach ($orderItems as $item) {
+                    $restoreStockStmt = $db->prepare("UPDATE products SET stock = stock + :quantity WHERE id = :product_id");
+                    $restoreStockStmt->execute([
+                        ':quantity' => $item['quantity'],
+                        ':product_id' => $item['product_id']
+                    ]);
+                }
+            }
+            
+            // Cập nhật trạng thái đơn hàng
+            $stmt = $db->prepare("UPDATE orders SET status = :status WHERE id = :id");
+            $stmt->execute([':status' => $newStatus, ':id' => $orderId]);
+            
+            $db->commit();
+            
+            Session::setFlash('success', 'Cập nhật trạng thái đơn hàng thành công!');
+        } catch (Exception $e) {
+            $db->rollBack();
+            Session::setFlash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
+    }
+    
     header('Location: order-detail.php?id=' . $orderId);
     exit();
 }
+
+// Lấy danh sách trạng thái có thể chuyển
+$availableStatuses = $allowedTransitions[$order['status']];
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -126,22 +172,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                 <h5 class="mb-0">Trạng thái đơn hàng</h5>
             </div>
             <div class="card-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Cập nhật trạng thái:</label>
-                        <select name="status" class="form-select">
-                            <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>Chờ xác nhận</option>
-                            <option value="confirmed" <?= $order['status'] === 'confirmed' ? 'selected' : '' ?>>Đã xác nhận</option>
-                            <option value="processing" <?= $order['status'] === 'processing' ? 'selected' : '' ?>>Đang xử lý</option>
-                            <option value="shipping" <?= $order['status'] === 'shipping' ? 'selected' : '' ?>>Đang giao</option>
-                            <option value="completed" <?= $order['status'] === 'completed' ? 'selected' : '' ?>>Hoàn thành</option>
-                            <option value="cancelled" <?= $order['status'] === 'cancelled' ? 'selected' : '' ?>>Đã hủy</option>
-                        </select>
+                <?php
+                $statusColors = [
+                    'pending' => 'warning',
+                    'confirmed' => 'info',
+                    'processing' => 'primary',
+                    'shipping' => 'secondary',
+                    'completed' => 'success',
+                    'cancelled' => 'danger'
+                ];
+                $statusTexts = [
+                    'pending' => 'Chờ xác nhận',
+                    'confirmed' => 'Đã xác nhận',
+                    'processing' => 'Đang xử lý',
+                    'shipping' => 'Đang giao',
+                    'completed' => 'Hoàn thành',
+                    'cancelled' => 'Đã hủy'
+                ];
+                ?>
+                
+                <div class="text-center mb-3">
+                    <span class="badge bg-<?= $statusColors[$order['status']] ?> fs-6 px-4 py-2">
+                        <?= $statusTexts[$order['status']] ?>
+                    </span>
+                </div>
+                
+                <?php if (empty($availableStatuses)): ?>
+                    <!-- Không thể thay đổi trạng thái -->
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-lock me-2"></i>
+                        <?php if ($order['status'] === 'completed'): ?>
+                            Đơn hàng đã hoàn thành, không thể thay đổi trạng thái.
+                        <?php elseif ($order['status'] === 'cancelled'): ?>
+                            Đơn hàng đã bị hủy, không thể thay đổi trạng thái.
+                        <?php endif; ?>
                     </div>
-                    <button type="submit" name="update_status" class="btn btn-primary w-100">
-                        <i class="fas fa-save"></i> Cập nhật
-                    </button>
-                </form>
+                <?php else: ?>
+                    <!-- Form cập nhật trạng thái -->
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Cập nhật trạng thái:</label>
+                            <select name="status" class="form-select" required>
+                                <option value="">-- Chọn trạng thái --</option>
+                                <?php foreach ($availableStatuses as $status): ?>
+                                    <option value="<?= $status ?>"><?= $statusTexts[$status] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit" name="update_status" class="btn btn-primary w-100">
+                            <i class="fas fa-save"></i> Cập nhật
+                        </button>
+                    </form>
+                    
+                    <!-- Hướng dẫn chuyển trạng thái -->
+                    <div class="alert alert-info mt-3 small">
+                        <strong>Có thể chuyển sang:</strong><br>
+                        <?php foreach ($availableStatuses as $status): ?>
+                            <span class="badge bg-<?= $statusColors[$status] ?> me-1"><?= $statusTexts[$status] ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         
