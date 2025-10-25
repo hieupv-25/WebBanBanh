@@ -1,5 +1,6 @@
 <?php
-$pageTitle = 'Thêm sản phẩm';
+ob_start(); // ✅ THÊM: Bật output buffering
+$pageTitle = 'Thêm sản phẩm mới';
 require_once 'includes/header.php';
 require_once '../../../backend/config/database.php';
 
@@ -77,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($result) {
             Session::setFlash('success', 'Thêm sản phẩm thành công!');
+            ob_end_clean(); // ✅ THÊM: Xóa output buffer
             header('Location: products.php');
             exit();
         } else {
@@ -86,20 +88,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Thêm sản phẩm mới</h2>
-    <a href="products.php" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Quay lại
-    </a>
-</div>
-
-<div class="card">
-    <div class="card-body">
-        <?php if (!empty($errors['general'])): ?>
-            <div class="alert alert-danger"><?= e($errors['general']) ?></div>
-        <?php endif; ?>
-        
-        <form method="POST" enctype="multipart/form-data">
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Thêm sản phẩm mới</h2>
+        <a href="products.php" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+    
+    <?php if (!empty($errors['general'])): ?>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i><?= e($errors['general']) ?>
+        </div>
+    <?php endif; ?>
+    
+    <form method="POST" enctype="multipart/form-data" class="card">
+        <div class="card-body">
             <div class="row">
                 <div class="col-md-8">
                     <div class="mb-3">
@@ -112,6 +116,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     
                     <div class="mb-3">
+                        <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                        <select name="category_id" class="form-select <?= isset($errors['category_id']) ? 'is-invalid' : '' ?>" required>
+                            <option value="">-- Chọn danh mục --</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>" 
+                                    <?= isset($oldData['category_id']) && $oldData['category_id'] == $cat['id'] ? 'selected' : '' ?>>
+                                    <?= e($cat['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (isset($errors['category_id'])): ?>
+                            <div class="invalid-feedback"><?= e($errors['category_id']) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Giá <span class="text-danger">*</span></label>
+                            <input type="number" name="price" class="form-control <?= isset($errors['price']) ? 'is-invalid' : '' ?>" 
+                                   value="<?= e($oldData['price'] ?? '') ?>" step="0.01" required>
+                            <?php if (isset($errors['price'])): ?>
+                                <div class="invalid-feedback"><?= e($errors['price']) ?></div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Giá khuyến mãi</label>
+                            <input type="number" name="sale_price" class="form-control" 
+                                   value="<?= e($oldData['sale_price'] ?? '') ?>" step="0.01">
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Số lượng</label>
+                            <input type="number" name="stock" class="form-control" 
+                                   value="<?= e($oldData['stock'] ?? 0) ?>" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
                         <label class="form-label">Mô tả</label>
                         <textarea name="description" class="form-control" rows="4"><?= e($oldData['description'] ?? '') ?></textarea>
                     </div>
@@ -119,46 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mb-3">
                         <label class="form-label">Thành phần</label>
                         <textarea name="ingredients" class="form-control" rows="3"><?= e($oldData['ingredients'] ?? '') ?></textarea>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Giá bán <span class="text-danger">*</span></label>
-                            <input type="number" name="price" class="form-control <?= isset($errors['price']) ? 'is-invalid' : '' ?>" 
-                                   value="<?= e($oldData['price'] ?? '') ?>" min="0" step="1000" required>
-                            <?php if (isset($errors['price'])): ?>
-                                <div class="invalid-feedback"><?= e($errors['price']) ?></div>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Giá khuyến mãi</label>
-                            <input type="number" name="sale_price" class="form-control" 
-                                   value="<?= e($oldData['sale_price'] ?? '') ?>" min="0" step="1000">
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
-                            <input type="number" name="stock" class="form-control" 
-                                   value="<?= e($oldData['stock'] ?? 0) ?>" min="0" required>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Danh mục <span class="text-danger">*</span></label>
-                            <select name="category_id" class="form-select <?= isset($errors['category_id']) ? 'is-invalid' : '' ?>" required>
-                                <option value="">Chọn danh mục</option>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>" <?= ($oldData['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
-                                        <?= e($cat['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <?php if (isset($errors['category_id'])): ?>
-                                <div class="invalid-feedback"><?= e($errors['category_id']) ?></div>
-                            <?php endif; ?>
-                        </div>
                     </div>
                 </div>
                 
@@ -170,47 +173,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php if (isset($errors['image'])): ?>
                             <div class="invalid-feedback"><?= e($errors['image']) ?></div>
                         <?php endif; ?>
-                        <div class="mt-2">
-                            <img id="preview" src="<?= url('frontend/assets/images/no-image.png') ?>" 
-                                 alt="Preview" style="max-width: 100%; height: auto;">
+                        <div class="mt-3">
+                            <img id="preview" src="" alt="" style="max-width: 100%; display: none;">
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label d-block">Tùy chọn</label>
+                        <label class="form-label">Tùy chọn</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" 
+                            <input type="checkbox" name="is_featured" class="form-check-input" id="is_featured"
                                    <?= isset($oldData['is_featured']) ? 'checked' : '' ?>>
                             <label class="form-check-label" for="is_featured">Sản phẩm nổi bật</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_new" id="is_new"
+                            <input type="checkbox" name="is_new" class="form-check-input" id="is_new"
                                    <?= isset($oldData['is_new']) ? 'checked' : '' ?>>
                             <label class="form-check-label" for="is_new">Sản phẩm mới</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="status" id="status" checked>
+                            <input type="checkbox" name="status" class="form-check-input" id="status" checked>
                             <label class="form-check-label" for="status">Hiển thị</label>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Lưu sản phẩm
-                </button>
-            </div>
-        </form>
-    </div>
+        </div>
+        
+        <div class="card-footer text-end">
+            <a href="products.php" class="btn btn-secondary me-2">
+                <i class="fas fa-times me-2"></i>Hủy
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Lưu sản phẩm
+            </button>
+        </div>
+    </form>
 </div>
 
 <script>
 function previewImage(input) {
+    const preview = document.getElementById('preview');
     if (input.files && input.files[0]) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('preview').src = e.target.result;
+            preview.src = e.target.result;
+            preview.style.display = 'block';
         }
         reader.readAsDataURL(input.files[0]);
     }

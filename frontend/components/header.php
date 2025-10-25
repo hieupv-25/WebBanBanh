@@ -113,20 +113,30 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="<?= url('frontend/pages/index.php') ?>">
-                            <i class="fas fa-home"></i> Trang chủ
+                            <i class="fas fa-home me-1"></i>Trang chủ
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" data-bs-toggle="dropdown">
                             Sản phẩm
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php') ?>">Tất cả sản phẩm</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-ngot') ?>">Bánh ngọt</a></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-my') ?>">Bánh mỳ</a></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-sinh-nhat') ?>">Bánh sinh nhật</a></li>
-                            <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=banh-trung-thu') ?>">Bánh trung thu</a></li>
+                            <?php
+                            $database = new Database();
+                            $db = $database->getConnection();
+                            $categories = $db->query("SELECT * FROM categories WHERE status = 1 ORDER BY display_order ASC, name ASC")->fetchAll();
+                            
+                            foreach ($categories as $category):
+                            ?>
+                                <li>
+                                    <!-- ✅ SỬA DÒNG NÀY: Thêm /list.php -->
+                                    <a class="dropdown-item" href="<?= url('frontend/pages/products/list.php?category=' . $category['slug']) ?>">
+                                        <?= e($category['name']) ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
                     </li>
                     <li class="nav-item">

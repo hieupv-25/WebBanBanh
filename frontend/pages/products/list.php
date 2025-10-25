@@ -1,9 +1,7 @@
 <?php
-$pageTitle = 'Sản phẩm';
-require_once '../../components/header.php';
+require_once '../../../backend/config/config.php';
 require_once '../../../backend/config/database.php';
 
-// Get database connection
 $database = new Database();
 $db = $database->getConnection();
 
@@ -13,22 +11,23 @@ $limit = PRODUCTS_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
 // Filters
-$category = isset($_GET['category']) ? $_GET['category'] : '';
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$category = isset($_GET['category']) ? trim($_GET['category']) : '';
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
 
-// Build query
+// ✅ SỬA: Dùng positional parameters (?) thay vì named parameters (:name)
 $where = ["p.status = 1"];
 $params = [];
 
 if (!empty($category)) {
-    $where[] = "c.slug = :category";
-    $params[':category'] = $category;
+    $where[] = "c.slug = ?";
+    $params[] = $category;
 }
 
 if (!empty($search)) {
-    $where[] = "(p.name LIKE :search OR p.description LIKE :search)";
-    $params[':search'] = "%$search%";
+    $where[] = "(p.name LIKE ? OR p.description LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
 }
 
 $whereClause = implode(' AND ', $where);
@@ -51,10 +50,11 @@ switch ($sort) {
 }
 
 // Count total products
-$countQuery = "SELECT COUNT(*) as total 
-               FROM products p 
-               LEFT JOIN categories c ON p.category_id = c.id 
+$countQuery = "SELECT COUNT(*) as total
+               FROM products p
+               LEFT JOIN categories c ON p.category_id = c.id
                WHERE $whereClause";
+
 $countStmt = $db->prepare($countQuery);
 $countStmt->execute($params);
 $totalProducts = $countStmt->fetch()['total'];
@@ -62,19 +62,18 @@ $totalPages = ceil($totalProducts / $limit);
 
 // Get products
 $query = "SELECT p.*, c.name as category_name, c.slug as category_slug
-          FROM products p 
-          LEFT JOIN categories c ON p.category_id = c.id 
-          WHERE $whereClause 
-          ORDER BY $orderBy 
-          LIMIT :limit OFFSET :offset";
+          FROM products p
+          LEFT JOIN categories c ON p.category_id = c.id
+          WHERE $whereClause
+          ORDER BY $orderBy
+          LIMIT ? OFFSET ?";
 
 $stmt = $db->prepare($query);
-foreach ($params as $key => $value) {
-    $stmt->bindValue($key, $value);
-}
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
+
+// ✅ SỬA: Merge tất cả params vào 1 array
+$allParams = array_merge($params, [$limit, $offset]);
+$stmt->execute($allParams);
+
 $products = $stmt->fetchAll();
 
 // Get all categories for filter
@@ -93,184 +92,213 @@ if (!empty($category)) {
         }
     }
 }
+
+$pageTitle = $categoryName;
+require_once '../../components/header.php';
 ?>
 
 <!-- Breadcrumb -->
-<section class="breadcrumb-section py-3 bg-light">
+<nav aria-label="breadcrumb" class="bg-light py-3">
     <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= url('frontend/pages/index.php') ?>">Trang chủ</a></li>
-                <li class="breadcrumb-item active">Sản phẩm</li>
-                <?php if (!empty($category)): ?>
-                    <li class="breadcrumb-item active"><?= e($categoryName) ?></li>
-                <?php endif; ?>
-            </ol>
-        </nav>
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="<?= url('frontend/pages/index.php') ?>">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="<?= url('frontend/pages/products/list.php') ?>">Sản phẩm</a></li>
+            <?php if (!empty($category)): ?>
+                <li class="breadcrumb-item active"><?= e($categoryName) ?></li>
+            <?php else: ?>
+                <li class="breadcrumb-item active">Tất cả sản phẩm</li>
+            <?php endif; ?>
+        </ol>
     </div>
-</section>
+</nav>
 
-<!-- Products Section -->
-<section class="products-section py-5">
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar Filters -->
-            <div class="col-lg-3 mb-4">
-                <div class="filters-sidebar">
-                    <!-- Categories Filter -->
-                    <div class="filter-group mb-4">
-                        <h5 class="filter-title">Danh mục</h5>
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <a href="<?= url('frontend/pages/products/list.php') ?>" 
-                                   class="text-decoration-none <?= empty($category) ? 'fw-bold text-brown' : 'text-dark' ?>">
-                                    Tất cả sản phẩm
-                                </a>
-                            </li>
-                            <?php foreach ($categories as $cat): ?>
-                                <li class="mb-2">
-                                    <a href="<?= url('frontend/pages/products/list.php?category=' . $cat['slug']) ?>" 
-                                       class="text-decoration-none <?= $category === $cat['slug'] ? 'fw-bold text-brown' : 'text-dark' ?>">
-                                        <?= e($cat['name']) ?>
-                                    </a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+<div class="container my-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card mb-3">
+                <div class="card-header" style="background-color: #8B4513; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh mục</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="<?= url('frontend/pages/products/list.php') ?>" 
+                       class="list-group-item list-group-item-action <?= empty($category) ? 'active' : '' ?>">
+                        Tất cả sản phẩm
+                    </a>
+                    <?php foreach ($categories as $cat): ?>
+                        <a href="<?= url('frontend/pages/products/list.php?category=' . $cat['slug']) ?>" 
+                           class="list-group-item list-group-item-action <?= $category === $cat['slug'] ? 'active' : '' ?>">
+                            <?= e($cat['name']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
-                    <!-- Price Range (Optional - can implement later) -->
-                    <div class="filter-group mb-4">
-                        <h5 class="filter-title">Khoảng giá</h5>
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <a href="#" class="text-decoration-none text-dark">Dưới 20,000₫</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-decoration-none text-dark">20,000₫ - 50,000₫</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-decoration-none text-dark">50,000₫ - 100,000₫</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-decoration-none text-dark">Trên 100,000₫</a>
-                            </li>
-                        </ul>
-                    </div>
+            <!-- Price Range Filter -->
+            <div class="card mb-3">
+                <div class="card-header" style="background-color: #8B4513; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Khoảng giá</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="<?= url('frontend/pages/products/list.php?price=0-20000') ?>" 
+                       class="list-group-item list-group-item-action">Dưới 20,000₫</a>
+                    <a href="<?= url('frontend/pages/products/list.php?price=20000-50000') ?>" 
+                       class="list-group-item list-group-item-action">20,000₫ - 50,000₫</a>
+                    <a href="<?= url('frontend/pages/products/list.php?price=50000-100000') ?>" 
+                       class="list-group-item list-group-item-action">50,000₫ - 100,000₫</a>
+                    <a href="<?= url('frontend/pages/products/list.php?price=100000-999999') ?>" 
+                       class="list-group-item list-group-item-action">Trên 100,000₫</a>
+                </div>
+            </div>
 
-                    <!-- Featured Products -->
-                    <div class="filter-group">
-                        <h5 class="filter-title">Sản phẩm nổi bật</h5>
-                        <?php
-                        $featuredQuery = "SELECT * FROM products WHERE is_featured = 1 AND status = 1 LIMIT 3";
-                        $featuredStmt = $db->prepare($featuredQuery);
-                        $featuredStmt->execute();
-                        $featuredProducts = $featuredStmt->fetchAll();
-                        ?>
-                        <?php foreach ($featuredProducts as $featured): ?>
-                            <div class="featured-product-item mb-3 d-flex">
+            <!-- Featured Products -->
+            <div class="card">
+                <div class="card-header" style="background-color: #8B4513; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Sản phẩm nổi bật</h5>
+                </div>
+                <div class="card-body">
+                    <?php
+                    $featuredQuery = "SELECT * FROM products WHERE is_featured = 1 AND status = 1 LIMIT 3";
+                    $featuredStmt = $db->prepare($featuredQuery);
+                    $featuredStmt->execute();
+                    $featuredProducts = $featuredStmt->fetchAll();
+                    
+                    foreach ($featuredProducts as $featured):
+                    ?>
+                        <div class="d-flex mb-3 pb-3 border-bottom">
+                            <?php if ($featured['image']): ?>
                                 <img src="<?= url('storage/uploads/products/' . $featured['image']) ?>" 
                                      alt="<?= e($featured['name']) ?>" 
-                                     class="img-fluid rounded"
-                                     style="width: 60px; height: 60px; object-fit: cover;"
-                                     onerror="this.src='<?= url('frontend/assets/images/no-image.png') ?>'">
-                                <div class="ms-2">
-                                    <a href="<?= url('frontend/pages/products/detail.php?slug=' . $featured['slug']) ?>" 
-                                       class="text-decoration-none text-dark">
-                                        <small><?= e($featured['name']) ?></small>
-                                    </a>
-                                    <div class="text-brown fw-bold small">
-                                        <?= formatCurrency($featured['price']) ?>
-                                    </div>
+                                     class="me-2 rounded" 
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                            <?php else: ?>
+                                <div class="bg-light me-2 rounded d-flex align-items-center justify-content-center" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-image text-muted"></i>
                                 </div>
+                            <?php endif; ?>
+                            <div>
+                                <a href="<?= url('frontend/pages/products/detail.php?id=' . $featured['id']) ?>" 
+                                   class="text-decoration-none text-dark">
+                                    <small><?= e($featured['name']) ?></small>
+                                </a>
+                                <br>
+                                <strong style="color: #8B4513;"><?= formatCurrency($featured['price']) ?></strong>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
-            </div>
-
-            <!-- Products Grid -->
-            <div class="col-lg-9">
-                <!-- Header with sorting -->
-                <div class="products-header d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h4 class="mb-1"><?= e($categoryName) ?></h4>
-                        <p class="text-muted small mb-0">Hiển thị <?= count($products) ?> trên <?= $totalProducts ?> sản phẩm</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <label class="me-2 small">Sắp xếp:</label>
-                        <select class="form-select form-select-sm" id="sortSelect" style="width: auto;">
-                            <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Mới nhất</option>
-                            <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Giá: Thấp đến cao</option>
-                            <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Giá: Cao đến thấp</option>
-                            <option value="name" <?= $sort === 'name' ? 'selected' : '' ?>>Tên: A-Z</option>
-                        </select>
-                    </div>
-                </div>
-
-                <?php if (count($products) > 0): ?>
-                    <!-- Products Grid -->
-                    <div class="row g-4">
-                        <?php foreach ($products as $product): ?>
-                            <div class="col-lg-4 col-md-6">
-                                <?php include '../../components/product-card.php'; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <!-- Pagination -->
-                    <?php if ($totalPages > 1): ?>
-                        <nav class="mt-5">
-                            <ul class="pagination justify-content-center">
-                                <!-- Previous -->
-                                <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $page - 1 ?><?= !empty($category) ? '&category=' . $category : '' ?><?= !empty($search) ? '&search=' . $search : '' ?>&sort=<?= $sort ?>">
-                                        Trước
-                                    </a>
-                                </li>
-
-                                <!-- Page Numbers -->
-                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                    <li class="page-item <?= $page === $i ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?><?= !empty($category) ? '&category=' . $category : '' ?><?= !empty($search) ? '&search=' . $search : '' ?>&sort=<?= $sort ?>">
-                                            <?= $i ?>
-                                        </a>
-                                    </li>
-                                <?php endfor; ?>
-
-                                <!-- Next -->
-                                <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $page + 1 ?><?= !empty($category) ? '&category=' . $category : '' ?><?= !empty($search) ? '&search=' . $search : '' ?>&sort=<?= $sort ?>">
-                                        Sau
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    <?php endif; ?>
-
-                <?php else: ?>
-                    <!-- No products found -->
-                    <div class="text-center py-5">
-                        <i class="fas fa-shopping-basket fa-4x text-muted mb-3"></i>
-                        <h4>Không tìm thấy sản phẩm</h4>
-                        <p class="text-muted">Vui lòng thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm.</p>
-                        <a href="<?= url('frontend/pages/products/list.php') ?>" class="btn btn-brown">
-                            Xem tất cả sản phẩm
-                        </a>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- JavaScript for sorting -->
-<script>
-document.getElementById('sortSelect').addEventListener('change', function() {
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('sort', this.value);
-    currentUrl.searchParams.set('page', '1'); // Reset to page 1 when sorting
-    window.location.href = currentUrl.toString();
-});
-</script>
+        <!-- Products Grid -->
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><?= e($categoryName) ?></h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-box me-1"></i>
+                        Hiển thị <?= count($products) ?> trên <?= $totalProducts ?> sản phẩm
+                    </p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <label class="me-2 mb-0"><i class="fas fa-sort me-1"></i>Sắp xếp:</label>
+                    <select class="form-select" style="width: 200px;" onchange="window.location.href=this.value">
+                        <?php
+                        $sortOptions = [
+                            'newest' => 'Mới nhất',
+                            'price_asc' => 'Giá: Thấp đến cao',
+                            'price_desc' => 'Giá: Cao đến thấp',
+                            'name' => 'Tên: A-Z'
+                        ];
+                        
+                        foreach ($sortOptions as $value => $label):
+                            $urlParams = $_GET;
+                            $urlParams['sort'] = $value;
+                            $url = '?' . http_build_query($urlParams);
+                        ?>
+                            <option value="<?= $url ?>" <?= $sort === $value ? 'selected' : '' ?>>
+                                <?= $label ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <?php if (!empty($products)): ?>
+                <!-- Products -->
+                <div class="row">
+                    <?php foreach ($products as $product): ?>
+                        <div class="col-md-4 mb-4">
+                            <?php include '../../components/product-card.php'; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <?php
+                                    $prevParams = $_GET;
+                                    $prevParams['page'] = $page - 1;
+                                    ?>
+                                    <a class="page-link" href="?<?= http_build_query($prevParams) ?>">
+                                        <i class="fas fa-chevron-left"></i> Trước
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+
+                            <?php
+                            $start = max(1, $page - 2);
+                            $end = min($totalPages, $page + 2);
+                            
+                            for ($i = $start; $i <= $end; $i++):
+                                $pageParams = $_GET;
+                                $pageParams['page'] = $i;
+                            ?>
+                                <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                                    <a class="page-link" href="?<?= http_build_query($pageParams) ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <?php
+                                    $nextParams = $_GET;
+                                    $nextParams['page'] = $page + 1;
+                                    ?>
+                                    <a class="page-link" href="?<?= http_build_query($nextParams) ?>">
+                                        Sau <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                <?php endif; ?>
+            <?php else: ?>
+                <!-- No Products -->
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                    <h4>Không tìm thấy sản phẩm</h4>
+                    <p class="mb-3">
+                        <?php if (!empty($search)): ?>
+                            Không có kết quả nào cho từ khóa "<strong><?= e($search) ?></strong>"
+                        <?php else: ?>
+                            Danh mục này chưa có sản phẩm nào.
+                        <?php endif; ?>
+                    </p>
+                    <p class="text-muted">Vui lòng thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm.</p>
+                    <a href="<?= url('frontend/pages/products/list.php') ?>" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>Xem tất cả sản phẩm
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 
 <?php require_once '../../components/footer.php'; ?>
