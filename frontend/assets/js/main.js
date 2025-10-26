@@ -114,4 +114,70 @@ document.addEventListener('DOMContentLoaded', function() {
             bsAlert.close();
         }, 5000);
     });
+
+      const NAV_BREAKPOINT = 992; // lg
+
+  // (Tuỳ chọn) đánh số item để so-le (khớp với CSS comment ở trên)
+  document.querySelectorAll('.navbar .dropdown').forEach(function (dd) {
+    const items = dd.querySelectorAll('.dropdown-menu > li > a.dropdown-item');
+    items.forEach((a, idx) => a.style.setProperty('--i', idx));
+  });
+
+  document.querySelectorAll('.navbar .dropdown').forEach(function (dd) {
+    const toggle = dd.querySelector('[data-bs-toggle="dropdown"]');
+    const menu   = dd.querySelector('.dropdown-menu');
+    if (!toggle || !menu) return;
+
+    let showTimer, hideTimer;
+
+    // Hover in (desktop): mở mượt
+    dd.addEventListener('mouseenter', function () {
+      if (window.innerWidth < NAV_BREAKPOINT) return;
+      clearTimeout(hideTimer);
+      showTimer = setTimeout(function () {
+        dd.classList.add('open-hover');
+        toggle.setAttribute('aria-expanded', 'true');
+        // dọn "show" nếu vô tình có
+        dd.classList.remove('show');
+        menu.classList.remove('show');
+      }, 150);
+    });
+
+    // Hover out (desktop): đóng mượt (đảo chiều)
+    dd.addEventListener('mouseleave', function () {
+      if (window.innerWidth < NAV_BREAKPOINT) return;
+      clearTimeout(showTimer);
+      hideTimer = setTimeout(function () {
+        dd.classList.remove('open-hover');
+        toggle.setAttribute('aria-expanded', 'false');
+        // đảm bảo không kẹt trạng thái bootstrap
+        dd.classList.remove('show');
+        menu.classList.remove('show');
+      }, 180);
+    });
+
+    // Desktop: chặn click vào nút toggle để không bật cơ chế .show của Bootstrap
+    toggle.addEventListener('click', function (e) {
+      if (window.innerWidth >= NAV_BREAKPOINT) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  });
+
+  // Khi đổi kích thước từ mobile ↔ desktop: dọn trạng thái cũ
+  window.addEventListener('resize', function () {
+    document.querySelectorAll('.navbar .dropdown').forEach(function (dd) {
+      const toggle = dd.querySelector('[data-bs-toggle="dropdown"]');
+      const menu   = dd.querySelector('.dropdown-menu');
+      if (window.innerWidth < 992) {
+        dd.classList.remove('open-hover');
+        toggle && toggle.setAttribute('aria-expanded', 'false');
+      } else {
+        // trên desktop, dọn .show để chỉ còn open-hover điều khiển
+        dd.classList.remove('show');
+        menu && menu.classList.remove('show');
+      }
+    });
+  });
 });

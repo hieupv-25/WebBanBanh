@@ -218,3 +218,56 @@ body {
         font-size: 0.9rem;
     }
 }
+
+/* Hover dropdown đổ xuống/rút lên mượt (desktop ≥992px) */
+@media (min-width: 992px) {
+  .navbar .dropdown-menu {
+    display: block !important;         /* ghi đè display:none */
+    max-height: 0;                     /* đóng */
+    opacity: 0;
+    transform: translateY(-8px);       /* rút lên nhẹ khi đóng */
+    visibility: hidden;
+    overflow: hidden;                  /* che item khi đang đóng */
+    pointer-events: none;
+    transition:
+      max-height .45s ease,
+      opacity .35s ease,
+      transform .28s ease,
+      visibility .28s ease;
+    z-index: 1050;
+    will-change: max-height, opacity, transform;
+  }
+
+  /* MỞ khi có class open-hover trên .dropdown */
+  .navbar .dropdown.open-hover > .dropdown-menu {
+    max-height: 480px;                 /* đủ lớn cho số item của bạn */
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* (Tuỳ chọn) các item xuất hiện so-le dễ chịu */
+  .navbar .dropdown-menu > li > a.dropdown-item {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .40s ease, transform .40s ease;
+  }
+  .navbar .dropdown.open-hover > .dropdown-menu > li > a.dropdown-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* nếu muốn so-le, JS sẽ set --i; bật dòng dưới: */
+  /* .navbar .dropdown.open-hover > .dropdown-menu > li > a.dropdown-item { transition-delay: calc(var(--i, 0) * 45ms); } */
+
+  @media (prefers-reduced-motion: reduce) {
+    .navbar .dropdown-menu,
+    .navbar .dropdown-menu > li > a.dropdown-item {
+      transition: none !important;
+    }
+  }
+  @media (min-width: 992px) {
+  .navbar .dropdown { position: relative; }    /* rất quan trọng */
+  .navbar .dropdown > .dropdown-menu { left: 12px; } /* chỉnh số theo ý muốn */
+    } 
+}

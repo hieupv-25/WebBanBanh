@@ -118,7 +118,7 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" data-bs-toggle="dropdown">
-                            Sản phẩm
+                            Danh mục sản phẩm
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php') ?>">Tất cả sản phẩm</a></li>
