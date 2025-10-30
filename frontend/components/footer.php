@@ -39,12 +39,29 @@
 
                 <!-- Policies -->
                 <div class="col-md-3 mb-4">
-                    <h5 class="text-uppercase mb-3">Chính sách</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white-50 text-decoration-none">Chính sách bảo mật</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Điều khoản sử dụng</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Chính sách đổi trả</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Chính sách thanh toán</a></li>
+                    <h5>Liên kết</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="<?= url('frontend/pages/about.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Giới thiệu
+                        </a></li>
+                        <li><a href="<?= url('frontend/pages/privacy-policy.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Chính sách bảo mật & Điều khoản sử dụng
+                        </a></li>
+                        <li><a href="<?= url('frontend/pages/food-safety-policy.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Chính sách chất lượng ATTP
+                        </a></li>
+                        <li><a href="<?= url('frontend/pages/products/list.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Sản phẩm
+                        </a></li>
+                        <li><a href="<?= url('frontend/pages/payment-policy.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Thanh toán
+                        </a></li>
+                        <li><a href="<?= url('frontend/pages/return-policy.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Chính sách đổi trả
+                        </a></li>
+                        <li><a href="<?= url('frontend/pages/contact.php') ?>">
+                            <i class="fas fa-angle-right me-2"></i>Liên hệ với chúng tôi
+                        </a></li>
                     </ul>
                 </div>
 
