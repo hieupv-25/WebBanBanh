@@ -45,11 +45,26 @@ class Session
     // Flash
     public static function setFlash($key, $message): void { self::start(); $_SESSION['flash'][$key] = $message; }
     public static function getFlash($key) { self::start(); $m=$_SESSION['flash'][$key]??null; if(isset($_SESSION['flash'][$key])) unset($_SESSION['flash'][$key]); return $m; }
+    public static function hasFlash($key): bool { self::start(); return isset($_SESSION['flash'][$key]); }
 
     // Cart
     public static function getCart(): array { self::start(); return $_SESSION['cart'] ?? []; }
     public static function getCartCount(): int { self::start(); $t=0; foreach(($_SESSION['cart']??[]) as $q){$t+=(int)$q;} return $t; }
     public static function getCartDistinctCount(): int { self::start(); return isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; }
     public static function addToCart($pid, $qty=1): void { self::start(); if(!isset($_SESSION['cart'][$pid])) $_SESSION['cart'][$pid]=0; $_SESSION['cart'][$pid]+=(int)$qty; }
+    
+    // ✅ THÊM 2 METHODS MỚI CHO GIỎ HÀNG
+    public static function updateCart($pid, $qty): void { 
+        self::start(); 
+        if(!isset($_SESSION['cart'])) $_SESSION['cart']=[]; 
+        if((int)$qty > 0) $_SESSION['cart'][$pid]=(int)$qty; 
+        else unset($_SESSION['cart'][$pid]); 
+    }
+    
+    public static function removeFromCart($pid): void { 
+        self::start(); 
+        if(isset($_SESSION['cart'][$pid])) unset($_SESSION['cart'][$pid]); 
+    }
+    
     public static function clearCart(): void { self::start(); unset($_SESSION['cart']); }
 }
