@@ -44,23 +44,9 @@ $categories = $stmtCategories->fetchAll();
         <div class="carousel-inner">
             <div class="carousel-item active">
                 <img src="<?= url('frontend/assets/images/slider/banner1.jpg') ?>" class="d-block w-100" alt="Banner 1">
-                <div class="carousel-caption">
-                    <h1 class="display-4 fw-bold">Trọn Vị Yêu Thương</h1>
-                    <p class="lead">Đã Đầy Đoàn Viên</p>
-                    <a href="<?= url('frontend/pages/products/list.php?category=banh-trung-thu') ?>" class="btn btn-brown btn-lg">
-                        Xem ngay
-                    </a>
-                </div>
             </div>
             <div class="carousel-item">
                 <img src="<?= url('frontend/assets/images/slider/banner2.jpg') ?>" class="d-block w-100" alt="Banner 2">
-                <div class="carousel-caption">
-                    <h1 class="display-4 fw-bold">Bánh Ngọt Pháp</h1>
-                    <p class="lead">Hương vị tinh tế, chất lượng tuyệt hảo</p>
-                    <a href="<?= url('frontend/pages/products/list.php') ?>" class="btn btn-brown btn-lg">
-                        Khám phá
-                    </a>
-                </div>
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselHero" data-bs-slide="prev">

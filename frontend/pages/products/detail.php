@@ -191,6 +191,7 @@ require_once '../../components/header.php';
                                 <button class="btn btn-brown btn-lg w-100 btn-add-to-cart" 
                                         data-product-id="<?= $product['id'] ?>"
                                         data-product-name="<?= e($product['name']) ?>"
+                                        data-quantity="1"
                                         <?= $product['stock'] <= 0 ? 'disabled' : '' ?>>
                                     <i class="fas fa-shopping-cart me-2"></i>
                                     Thêm vào giỏ hàng
@@ -242,55 +243,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const qtyInput = document.getElementById('quantity');
     const decreaseBtn = document.getElementById('decreaseQty');
     const increaseBtn = document.getElementById('increaseQty');
+    const addToCartBtn = document.querySelector('.btn-add-to-cart');
     const maxQty = parseInt(qtyInput.getAttribute('max'));
 
+    // Giảm số lượng
     decreaseBtn.addEventListener('click', function() {
         let currentValue = parseInt(qtyInput.value);
         if (currentValue > 1) {
             qtyInput.value = currentValue - 1;
+            // ✅ Cập nhật data-quantity
+            if (addToCartBtn) {
+                addToCartBtn.setAttribute('data-quantity', qtyInput.value);
+            }
         }
     });
 
+    // Tăng số lượng
     increaseBtn.addEventListener('click', function() {
         let currentValue = parseInt(qtyInput.value);
         if (currentValue < maxQty) {
             qtyInput.value = currentValue + 1;
+            // ✅ Cập nhật data-quantity
+            if (addToCartBtn) {
+                addToCartBtn.setAttribute('data-quantity', qtyInput.value);
+            }
         }
     });
 
-    // Update add to cart button to use quantity
-    const addToCartBtn = document.querySelector('.btn-add-to-cart');
-    if (addToCartBtn) {
-        addToCartBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const quantity = parseInt(qtyInput.value);
-            const productId = this.dataset.productId;
-            const productName = this.dataset.productName;
-
-            // Send AJAX request
-            fetch('../../../backend/src/controllers/CartController.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=add&product_id=${productId}&quantity=${quantity}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Đã thêm ${quantity} sản phẩm "${productName}" vào giỏ hàng`);
-                    // Update cart count in header
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Có lỗi xảy ra');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Không thể thêm vào giỏ hàng');
-            });
-        });
-    }
+    // ✅ Cập nhật data-quantity khi input thay đổi trực tiếp
+    qtyInput.addEventListener('change', function() {
+        if (addToCartBtn) {
+            addToCartBtn.setAttribute('data-quantity', this.value);
+        }
+    });
 });
 </script>
 

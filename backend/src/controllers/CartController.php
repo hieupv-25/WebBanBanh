@@ -8,7 +8,8 @@ require_once __DIR__ . '/../helpers/Session.php';
 
 header('Content-Type: application/json');
 
-$action = $_POST['action'] ?? '';
+// ✅ SỬA: Hỗ trợ cả GET và POST request
+$action = $_REQUEST['action'] ?? '';
 
 switch ($action) {
     case 'add':
@@ -20,7 +21,8 @@ switch ($action) {
     case 'remove':
         removeFromCart();
         break;
-    case 'get_count':
+    case 'count':           // ✅ THÊM case 'count' cho JavaScript
+    case 'get_count':       // ✅ GIỮ case cũ để không ảnh hưởng code khác
         getCartCount();
         break;
     default:
@@ -60,7 +62,7 @@ function addToCart() {
     echo json_encode([
         'success' => true,
         'message' => 'Đã thêm vào giỏ hàng',
-        'cart_count' => Session::getCartCount()
+        'count' => Session::getCartCount()  // ✅ Thêm count để cập nhật ngay
     ]);
 }
 
@@ -94,7 +96,7 @@ function updateCart() {
     echo json_encode([
         'success' => true,
         'message' => 'Đã cập nhật giỏ hàng',
-        'cart_count' => Session::getCartCount()
+        'count' => Session::getCartCount()  // ✅ Thêm count
     ]);
 }
 
@@ -110,7 +112,7 @@ function removeFromCart() {
     echo json_encode([
         'success' => true,
         'message' => 'Đã xóa khỏi giỏ hàng',
-        'cart_count' => Session::getCartCount()
+        'count' => Session::getCartCount()  // ✅ Thêm count
     ]);
 }
 

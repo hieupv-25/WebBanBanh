@@ -23,7 +23,7 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
         <link href="<?= url('frontend/assets/css/' . $customCSS) ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
-<body>
+<body data-cart-api-url="<?= url('backend/src/controllers/CartController.php') ?>">
     <!-- Top Bar -->
     <div class="top-bar bg-brown text-white py-2">
         <div class="container">
