@@ -23,7 +23,7 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
         <link href="<?= url('frontend/assets/css/' . $customCSS) ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
-<body>
+<body data-cart-api-url="<?= url('backend/src/controllers/CartController.php') ?>">
     <!-- Top Bar -->
     <div class="top-bar bg-brown text-white py-2">
         <div class="container">
@@ -118,7 +118,7 @@ require_once(__DIR__ . '/../../backend/src/helpers/Session.php');
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" data-bs-toggle="dropdown">
-                            Sản phẩm
+                            Danh mục sản phẩm
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?= url('frontend/pages/products/list.php') ?>">Tất cả sản phẩm</a></li>

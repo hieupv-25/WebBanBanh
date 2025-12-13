@@ -41,10 +41,10 @@
                 <div class="col-md-3 mb-4">
                     <h5 class="text-uppercase mb-3">Chính sách</h5>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-white-50 text-decoration-none">Chính sách bảo mật</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Điều khoản sử dụng</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Chính sách đổi trả</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Chính sách thanh toán</a></li>
+                        <li><a href="<?= url('frontend/pages/privacy-policy.php') ?>" class="text-white-50 text-decoration-none">Bảo mật & Điều khoản</a></li>
+                        <li><a href="<?= url('frontend/pages/food-safety-policy.php') ?>" class="text-white-50 text-decoration-none">Chất lượng ATTP</a></li>
+                        <li><a href="<?= url('frontend/pages/payment-policy.php') ?>" class="text-white-50 text-decoration-none">Thanh toán</a></li>
+                        <li><a href="<?= url('frontend/pages/return-policy.php') ?>" class="text-white-50 text-decoration-none">Đổi trả</a></li>
                     </ul>
                 </div>
 

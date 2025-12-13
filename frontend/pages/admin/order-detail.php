@@ -1,4 +1,7 @@
 <?php
+// ✅ BẬT OUTPUT BUFFERING NGAY ĐẦU FILE
+ob_start();
+
 $pageTitle = 'Chi tiết đơn hàng';
 require_once 'includes/header.php';
 require_once '../../../backend/config/database.php';
@@ -9,6 +12,7 @@ $db = $database->getConnection();
 $orderId = (int)($_GET['id'] ?? 0);
 if ($orderId <= 0) {
     Session::setFlash('error', 'Đơn hàng không tồn tại');
+    ob_end_clean(); // ✅ Xóa buffer trước khi redirect
     header('Location: orders.php');
     exit();
 }
@@ -20,6 +24,7 @@ $order = $stmt->fetch();
 
 if (!$order) {
     Session::setFlash('error', 'Đơn hàng không tồn tại');
+    ob_end_clean(); // ✅ Xóa buffer trước khi redirect
     header('Location: orders.php');
     exit();
 }
@@ -79,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         }
     }
     
+    ob_end_clean(); // ✅ Xóa buffer trước khi redirect
     header('Location: order-detail.php?id=' . $orderId);
     exit();
 }

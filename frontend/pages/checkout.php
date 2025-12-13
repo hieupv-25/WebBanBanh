@@ -114,14 +114,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Commit transaction
                 $db->commit();
-                
-                // Xóa giỏ hàng
-                Session::clearCart();
 
-                // Redirect
-                Session::setFlash('success', 'Đặt hàng thành công!');
-                header('Location: thankyou.php');
-                exit();
+                // Nếu thanh toán COD: giữ flow cũ
+                if ($method === 'cod') {
+                    Session::clearCart();
+                    Session::setFlash('success', 'Đặt hàng thành công!');
+                    header('Location: thankyou.php');
+                    exit();
+                }
+
+                // Nếu thanh toán qua VNPAY
+                if ($method === 'vnpay') {
+                    // Không xóa giỏ ngay, đợi thanh toán thành công mới xóa (tùy bạn)
+                    // Lưu order_id vào session để dùng sau nếu cần
+                    Session::set('last_order_id', $orderId);
+
+                    // Chuyển sang bước tạo URL thanh toán VNPAY
+                    header('Location: ' . url('frontend/pages/payment/vnpay_create_payment.php?order_id=' . $orderId));
+                    exit();
+                }
                 
             } catch (Exception $e) {
                 // Rollback nếu có lỗi
@@ -162,13 +173,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
                 <label>Địa chỉ nhận hàng*</label>
                 <textarea name="address" class="form-control" rows="3" required><?= e($_POST['address'] ?? '') ?></textarea>
-            </div>
+            </div>       
             <div class="mb-3">
-                <label>Phương thức thanh toán</label>
-                <select name="payment_method" class="form-select">
-                    <option value="cod">Thanh toán khi nhận hàng (COD)</option>
-                </select>
-            </div>
+                <label class="form-label">Phương thức thanh toán</label>
+                <div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_method" id="payment_cod" value="cod" checked>
+                        <label class="form-check-label" for="payment_cod">
+                            Thanh toán khi nhận hàng (COD)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_method" id="payment_vnpay" value="vnpay">
+                        <label class="form-check-label" for="payment_vnpay">
+                            Thanh toán qua VNPAY-QR
+                        </label>
+                    </div>
+                </div>  <!-- ✅ THÊM DÒNG NÀY -->
+            </div>  
+
         </div>
         
         <div class="col-md-6">

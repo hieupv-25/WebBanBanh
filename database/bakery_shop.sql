@@ -76,6 +76,8 @@ CREATE TABLE orders (
     total_amount DECIMAL(10,2) NOT NULL,
     payment_method ENUM('cod', 'bank_transfer', 'momo', 'vnpay') DEFAULT 'cod',
     payment_status ENUM('unpaid', 'paid') DEFAULT 'unpaid',
+    transaction_id VARCHAR(100) NULL COMMENT 'Mã giao dịch VNPAY',  -- ✅ THÊM DÒNG NÀY
+    paid_at DATETIME NULL COMMENT 'Thời gian thanh toán',            -- ✅ THÊM DÒNG NÀY
     status ENUM('pending', 'confirmed', 'processing', 'shipping', 'completed', 'cancelled') DEFAULT 'pending',
     notes TEXT,
     admin_notes TEXT,
